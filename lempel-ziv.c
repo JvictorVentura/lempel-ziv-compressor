@@ -17,22 +17,130 @@ void printBuffer(char *buffer , unsigned sizeOfBuffer){
 }
 
 
-void fillBuffer(char *buffer, FILE *arq, unsigned *bufferSize){
+void fillBuffer(char *buffer, FILE *arq, unsigned *bufferFilled){
 
 	int c = ' ';
 	
-	for(unsigned i = 0; i < BUFFER_SIZE; ++i){
+	for(unsigned i = *bufferFilled; i < BUFFER_SIZE; ++i){
 		if((c = fgetc(arq))== EOF)
 			break;
 		else{
 			buffer[i] = c;
-			++(*bufferSize);
+			++(*bufferFilled);
 		}
 	}
 
 }
 
+void scrollWindow(char *window, unsigned *windowFilled, unsigned scrollSize, char *buffer){
+	int k = 0;
+	for (int i = scrollSize; i > 0; --i){
+
+		if(*windowFilled == WINDOW_SIZE){
+			for (int j = 0; j < WINDOW_SIZE; ++j){
+				if( (j - i) >= 0)
+					window[j - i] = window[j];
+			}
+			*windowFilled -= i;
+		}else{
+			window[(*windowFilled)++] = buffer[k++];
+		}
+
+	}
+	
+}
+
+void scrollBuffer(char *buffer, unsigned *sizeOfBuffer, unsigned scrollSize, FILE *arq){
+	for (int i = scrollSize; i < *sizeOfBuffer; ++i){
+		buffer[i - scrollSize] = buffer[i];
+	}
+
+	*sizeOfBuffer -= scrollSize;
+
+	fillBuffer(buffer, arq, sizeOfBuffer);
+}
+
+
 int main(){
+	char buffer[BUFFER_SIZE];
+	char window[WINDOW_SIZE];
+	unsigned bufferFilled = 0;
+	unsigned windowFilled = 0;
+	unsigned scrollSize = 1;
+
+	FILE *arq = fopen("fileTest", "r");
+
+	if(arq != NULL){
+		fillBuffer(buffer, arq, &bufferFilled);
+	}
+
+	scrollWindow(window, &windowFilled, scrollSize, buffer);
+	scrollBuffer(buffer, &bufferFilled, scrollSize, arq);
+
+	printWindow(window, windowFilled);
+	printf("\t\\\t");
+	printBuffer(buffer, bufferFilled);
+
+//-------------------------------------------------------------
+	scrollSize = 1;
+
+	scrollWindow(window, &windowFilled, scrollSize, buffer);
+	scrollBuffer(buffer, &bufferFilled, scrollSize, arq);
+
+	printf("\n\n");
+	printWindow(window, windowFilled);
+	printf("\t\\\t");
+	printBuffer(buffer, bufferFilled);
+
+
+//-------------------------------------------------------------
+	scrollSize = 2;
+
+	scrollWindow(window, &windowFilled, scrollSize, buffer);
+	scrollBuffer(buffer, &bufferFilled, scrollSize, arq);
+
+	printf("\n\n");
+	printWindow(window, windowFilled);
+	printf("\t\\\t");
+	printBuffer(buffer, bufferFilled);
+
+//--------------------------------------------------------------
+
+	scrollSize = 3;
+
+	scrollWindow(window, &windowFilled, scrollSize, buffer);
+	scrollBuffer(buffer, &bufferFilled, scrollSize, arq);
+
+	printf("\n\n");
+	printWindow(window, windowFilled);
+	printf("\t\\\t");
+	printBuffer(buffer, bufferFilled);
+
+//---------------------------------------------------------------
+
+	scrollSize = 3;
+
+	scrollWindow(window, &windowFilled, scrollSize, buffer);
+	scrollBuffer(buffer, &bufferFilled, scrollSize, arq);
+
+	printf("\n\n");
+	printWindow(window, windowFilled);
+	printf("\t\\\t");
+	printBuffer(buffer, bufferFilled);
+
+//---------------------------------------------------------------
+
+	scrollSize = 3;
+
+	scrollWindow(window, &windowFilled, scrollSize, buffer);
+	scrollBuffer(buffer, &bufferFilled, scrollSize, arq);
+
+	printf("\n\n");
+	printWindow(window, windowFilled);
+	printf("\t\\\t");
+	printBuffer(buffer, bufferFilled);
+
+	fclose(arq);
 
 	return 0;
 }
