@@ -34,8 +34,9 @@ void fillBuffer(char *buffer, FILE *arq, unsigned *bufferFilled){
 
 void scrollWindow(char *window, unsigned *windowFilled, unsigned scrollSize, char *buffer){
 	int k = 0;
-	for (int i = scrollSize; i > 0; --i){
+	int i = scrollSize;
 
+	while( i > 0 ){
 		if(*windowFilled == WINDOW_SIZE){
 			for (int j = 0; j < WINDOW_SIZE; ++j){
 				if( (j - i) >= 0)
@@ -44,6 +45,7 @@ void scrollWindow(char *window, unsigned *windowFilled, unsigned scrollSize, cha
 			*windowFilled -= i;
 		}else{
 			window[(*windowFilled)++] = buffer[k++];
+			--i;
 		}
 
 	}
