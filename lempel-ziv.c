@@ -1,27 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
-typedef char byte;
 #define WINDOW_SIZE 8/*2048*/
 #define BUFFER_SIZE 4/*29*/
+#include <stdint.h>
 
-void printWindow(char *window, unsigned sizeOfWindowFilled){
-	for(unsigned i = 0; i < sizeOfWindowFilled; ++i)
+void printWindow(char *window, uint16_t sizeOfWindowFilled){
+	for(uint16_t i = 0; i < sizeOfWindowFilled; ++i)
 		printf("%c", window[i]);
 
 }
 
-void printBuffer(char *buffer , unsigned sizeOfBuffer){
-	for(unsigned i = 0; i < sizeOfBuffer; ++i)
+void printBuffer(char *buffer , uint16_t sizeOfBuffer){
+	for(uint16_t i = 0; i < sizeOfBuffer; ++i)
 		printf("%c", buffer[i]);
 
 }
 
 
-void fillBuffer(char *buffer, FILE *arq, unsigned *bufferFilled){
+void fillBuffer(char *buffer, FILE *arq, uint16_t *bufferFilled){
 
 	int c = ' ';
 	
-	for(unsigned i = *bufferFilled; i < BUFFER_SIZE; ++i){
+	for(uint16_t i = *bufferFilled; i < BUFFER_SIZE; ++i){
 		if((c = fgetc(arq))== EOF)
 			break;
 		else{
@@ -32,7 +32,7 @@ void fillBuffer(char *buffer, FILE *arq, unsigned *bufferFilled){
 
 }
 
-void scrollWindow(char *window, unsigned *windowFilled, unsigned scrollSize, char *buffer, unsigned bufferFilled){
+void scrollWindow(char *window, uint16_t *windowFilled, uint16_t scrollSize, char *buffer, uint16_t bufferFilled){
 	if(scrollSize > bufferFilled)
 		scrollSize = bufferFilled;
 
@@ -55,7 +55,7 @@ void scrollWindow(char *window, unsigned *windowFilled, unsigned scrollSize, cha
 	
 }
 
-void scrollBuffer(char *buffer, unsigned *sizeOfBuffer, unsigned scrollSize, FILE *arq){
+void scrollBuffer(char *buffer, uint16_t *sizeOfBuffer, uint16_t scrollSize, FILE *arq){
 	for (int i = scrollSize; i < *sizeOfBuffer; ++i){
 		buffer[i - scrollSize] = buffer[i];
 	}
@@ -70,12 +70,12 @@ void scrollBuffer(char *buffer, unsigned *sizeOfBuffer, unsigned scrollSize, FIL
 }
 
 
-byte searchOnDictionary(char *window, char *buffer, unsigned *bufferFilled, unsigned *windowFilled, unsigned *length, unsigned *location){
-	unsigned longestSequence = 0;
-	unsigned sequenceLocation = 0;
+uint8_t searchOnDictionary(char *window, char *buffer, uint16_t *bufferFilled, uint16_t *windowFilled, uint16_t *length, uint16_t *location){
+	uint16_t longestSequence = 0;
+	uint16_t sequenceLocation = 0;
 
-	unsigned actualSequence = 0;
-	unsigned actualLocation = 0;
+	uint16_t actualSequence = 0;
+	uint16_t actualLocation = 0;
 
 	int i2 = 0;
 
@@ -120,42 +120,42 @@ byte searchOnDictionary(char *window, char *buffer, unsigned *bufferFilled, unsi
 		return 0;
 }
 
-void write_location_and_length(unsigned length, unsigned location, FILE *arq){
-	byte byteWritten = 0;
+void write_location_and_length(uint16_t length, uint16_t location, FILE *arq){
+	uint8_t uint8_tWritten = 0;
 	for(int i = 16; i > 0; i >>= 1){
-		byteWritten += length & i;
+		uint8_tWritten += length & i;
 	}
 
-	byteWritten <<= 3;
+	uint8_tWritten <<= 3;
 	int index = 4;
 
 	for(int i = 1024; i > 0; i >>= 1){
 
 		if(index == 0){
-			fputc(byteWritten, arq);
+			fputc(uint8_tWritten, arq);
 			index = 128;
-			byteWritten = 0;
+			uint8_tWritten = 0;
 		}
 
 		if( (location & i) == i){
-			byteWritten = index;
+			uint8_tWritten = index;
 		}
 
 		index >>= 1;
 	}
 
-	fputc(byteWritten, arq);
+	fputc(uint8_tWritten, arq);
 }
 
 void compress(char *filename){
 
 	char *buffer = malloc(BUFFER_SIZE);
 	char *window = malloc(WINDOW_SIZE);
-	unsigned bufferFilled = 0;
-	unsigned windowFilled = 0;
+	uint16_t bufferFilled = 0;
+	uint16_t windowFilled = 0;
 
-	unsigned length = 0;
-	unsigned location = 0;
+	uint16_t length = 0;
+	uint16_t location = 0;
 
 	FILE *arq = fopen(filename, "r");
 
