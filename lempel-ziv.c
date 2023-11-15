@@ -8,8 +8,8 @@
 
 //TODO clean later
 
-void printWindow(char *window, uint16_t sizeOfWindowFilled){
-	for(uint16_t i = 0; i < sizeOfWindowFilled; ++i)
+void printWindow(char *window, uint16_t sizeOfwindow_usage_count){
+	for(uint16_t i = 0; i < sizeOfwindow_usage_count; ++i)
 		printf("%c", window[i]);
 
 }
@@ -36,29 +36,29 @@ void fillBuffer(char *buffer, FILE *arq, uint16_t *bufferFilled){//fill the buff
 
 }
 
-void fillWindow(char *window, char *buffer, uint16_t *windowFilled, int sizeToFill){//fill the window with a specified number of characters
+void fillWindow(char *window, char *buffer, uint16_t *window_usage_count, int sizeToFill){//fill the window with a specified number of characters
 	for(int i = 0; i < sizeToFill; ++i){
-		window[(*windowFilled)++] = buffer[i];
+		window[(*window_usage_count)++] = buffer[i];
 	}
 }
 
-void scrollWindow(char *window, uint16_t *windowFilled, int scrollSize){//push the characters to the begining of the window by a especified number of characters
+void scrollWindow(char *window, uint16_t *window_usage_count, int scrollSize){//push the characters to the begining of the window by a especified number of characters
 	for (int i = 0; i < WINDOW_SIZE; ++i){
-				if( (i - scrollSize) >= 0)
-					window[i - scrollSize] = window[i];
-			}
-			*windowFilled -= scrollSize;
+		if( (i - scrollSize) >= 0)
+			window[i - scrollSize] = window[i];
+	}
+	*window_usage_count -= scrollSize;
 }
 
-void scrollAndFillWindow(char *window, uint16_t *windowFilled, int scrollSize, char *buffer, uint16_t bufferFilled){
+void scrollAndFillWindow(char *window, uint16_t *window_usage_count, int scrollSize, char *buffer, uint16_t bufferFilled){
 	if(scrollSize > bufferFilled)//check to see if the scrollSize is incorrect
 		scrollSize = bufferFilled;
 
 	
-	if( (WINDOW_SIZE - *windowFilled) < scrollSize)//if there is no space left in the window it scrolls to make space to fill with new charaters from the buffer
-		scrollWindow(window, windowFilled, scrollSize - (WINDOW_SIZE - *windowFilled));
+	if( (WINDOW_SIZE - *window_usage_count) < scrollSize)//if there is no space left in the window it scrolls to make space to fill with new charaters from the buffer
+		scrollWindow(window, window_usage_count, scrollSize - (WINDOW_SIZE - *window_usage_count));
 	
-	fillWindow(window, buffer, windowFilled, scrollSize);//put a specified number of characters of buffer on window
+	fillWindow(window, buffer, window_usage_count, scrollSize);//put a specified number of characters of buffer on window
 }
 
 void scrollBuffer(char *buffer, uint16_t *sizeOfBuffer, uint16_t scrollSize){//scroll the buffer array by a determined number of characters
@@ -80,51 +80,51 @@ void scrollAndFillBuffer(char *buffer, uint16_t *sizeOfBuffer, uint16_t scrollSi
 }
 
 
-int8_t searchOnDictionary(char *window, char *buffer, uint16_t *bufferFilled, uint16_t *windowFilled, int *length, uint16_t *location){
-	uint16_t longestSequence = 0;
-	uint16_t sequenceLocation = 0;
+int8_t searchOnDictionary(char *window, char *buffer, uint16_t *bufferFilled, uint16_t *window_usage_count, int *length, uint16_t *location){
+	uint16_t longest_sequence = 0;
+	uint16_t location_longest_sequence = 0;
 
-	uint16_t actualSequence = 0;
-	uint16_t actualLocation = 0;
+	uint16_t current_Sequence = 0;
+	uint16_t location_current_sequence = 0;
 
-	int i2 = 0;
+	int buffer_index = 0;
 
-	for(int i = 0 ; i < *windowFilled; ++i){
+	for(int window_index = 0 ; window_index < *window_usage_count; ++window_index){
 
-		if( i2 == (BUFFER_SIZE -1) )
+		if( buffer_index == (BUFFER_SIZE -1) )
 			break;
 
-		if(actualSequence == 0){
-			if(window[i] == buffer[i2]){
-				actualLocation = i;
-				++actualSequence;
-				++i2;
+		if(current_Sequence == 0){
+			if(window[window_index] == buffer[buffer_index]){
+				location_current_sequence = window_index;
+				++current_Sequence;
+				++buffer_index;
 			}
 		}else{
-			if(window[i] == buffer[i2]){
-				++actualSequence;
-				++i2;
+			if(window[window_index] == buffer[buffer_index]){
+				++current_Sequence;
+				++buffer_index;
 			}else{
-				if(actualSequence > longestSequence){
-					longestSequence = actualSequence;
-					sequenceLocation = actualLocation;
+				if(current_Sequence > longest_sequence){
+					longest_sequence = current_Sequence;
+					location_longest_sequence = location_current_sequence;
 				}
-				actualSequence = 0;
-				i2 = 0;
+				current_Sequence = 0;
+				buffer_index = 0;
 			}
 		}
 
 	}	
 
-	if(actualSequence > longestSequence){
-		longestSequence = actualSequence;
-		sequenceLocation = actualLocation;
+	if(current_Sequence > longest_sequence){
+		longest_sequence = current_Sequence;
+		location_longest_sequence = location_current_sequence;
 	}
 
-	*length = longestSequence;
-	*location = sequenceLocation;
+	*length = longest_sequence;
+	*location = location_longest_sequence;
 
-	if(longestSequence > 0)
+	if(longest_sequence > 0)
 		return 1;
 	else
 		return 0;
@@ -223,7 +223,7 @@ void compress(char *base_file_filename, char *output_file_filename){
 	char *buffer = malloc(BUFFER_SIZE);
 	char *window = malloc(WINDOW_SIZE);
 	uint16_t bufferFilled = 0;
-	uint16_t windowFilled = 0;
+	uint16_t window_usage_count = 0;
 
 	int length = 0;
 	uint16_t location = 0;
@@ -252,13 +252,13 @@ void compress(char *base_file_filename, char *output_file_filename){
 
 	while(bufferFilled > 0){
 		
-		if(searchOnDictionary(window, buffer, &bufferFilled, &windowFilled, &length, &location)){
+		if(searchOnDictionary(window, buffer, &bufferFilled, &window_usage_count, &length, &location)){
 
 			newWriteLocationAndLength(length, location, output_file);
 			if(length < bufferFilled)
 				fputc(buffer[length++], output_file);
 
-			scrollAndFillWindow(window, &windowFilled, length , buffer, bufferFilled);
+			scrollAndFillWindow(window, &window_usage_count, length , buffer, bufferFilled);
 			scrollAndFillBuffer(buffer, &bufferFilled, length , base_file);
 		
 
@@ -268,7 +268,7 @@ void compress(char *base_file_filename, char *output_file_filename){
 				fputc(buffer[length], output_file);
 
 			length = 1;
-			scrollAndFillWindow(window, &windowFilled, 1, buffer, bufferFilled);
+			scrollAndFillWindow(window, &window_usage_count, 1, buffer, bufferFilled);
 			scrollAndFillBuffer(buffer, &bufferFilled, 1, base_file);
 
 
@@ -330,7 +330,7 @@ void decompress(char *base_file_filename, char *output_file_filename){
 	
 	char *window = malloc(WINDOW_SIZE);
 	char *buffer = malloc(BUFFER_SIZE);
-	uint16_t windowFilled = 0;
+	uint16_t window_usage_count = 0;
 	int bufferFilled = 0;
 
 	uint16_t length = 0;
@@ -374,7 +374,7 @@ void decompress(char *base_file_filename, char *output_file_filename){
 			}
 		}
 
-		scrollAndFillWindow( window, &windowFilled, length, buffer, length);
+		scrollAndFillWindow( window, &window_usage_count, length, buffer, length);
 		
 		bufferFilled = 0;
 		location = 0;
