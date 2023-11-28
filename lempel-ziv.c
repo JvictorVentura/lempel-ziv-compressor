@@ -130,35 +130,6 @@ int8_t searchOnDictionary(char *window, char *buffer, uint16_t *bufferFilled, ui
 		return 0;
 }
 
-void writeLocationAndLength(uint16_t length, uint16_t location, FILE *arq){
-	int8_t int8_tWritten = 0;
-	for(int i = 16; i > 0; i >>= 1){
-		int8_tWritten += length & i;
-	}
-
-	int8_tWritten <<= 3;
-	int index = 4;
-
-	for(int i = 1024; i > 0; i >>= 1){
-
-		if(index == 0){
-			fputc(int8_tWritten, arq);
-			index = 128;
-			int8_tWritten = 0;
-			i = 0;
-		}
-
-		if( (location & i) == i){
-			int8_tWritten = index;
-		}
-
-		index >>= 1;
-
-	}
-
-	fputc(location, arq);
-}
-
 void newWriteLocationAndLength(uint16_t length, uint16_t location, FILE *arq){
 	uint16_t bitMask = 1024;
 	uint16_t output = length << 11;
